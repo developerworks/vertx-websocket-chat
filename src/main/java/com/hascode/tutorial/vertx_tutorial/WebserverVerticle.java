@@ -3,6 +3,8 @@ package com.hascode.tutorial.vertx_tutorial;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
@@ -21,6 +23,7 @@ public class WebserverVerticle extends Verticle {
 
 	@Override
 	public void start() {
+		final Pattern chatUrlPattern = Pattern.compile("/chat/(\\w+)");
 		final EventBus eventBus = vertx.eventBus();
 		final Logger logger = container.logger();
 
@@ -29,7 +32,7 @@ public class WebserverVerticle extends Verticle {
 			public void handle(final HttpServerRequest request) {
 				request.response().sendFile("web/chat.html");
 			}
-		}).noMatch(new Handler<HttpServerRequest>() {
+		}).get(".*\\.(css|js)$", new Handler<HttpServerRequest>() {
 			@Override
 			public void handle(final HttpServerRequest request) {
 				request.response().sendFile("web/" + new File(request.path()));
@@ -41,12 +44,13 @@ public class WebserverVerticle extends Verticle {
 		vertx.createHttpServer().websocketHandler(new Handler<ServerWebSocket>() {
 			@Override
 			public void handle(final ServerWebSocket ws) {
-				if (!ws.path().matches("/chat/\\w+")) {
+				final Matcher m = chatUrlPattern.matcher(ws.path());
+				if (!m.matches()) {
 					ws.reject();
 					return;
 				}
 
-				final String chatRoom = "arduino";
+				final String chatRoom = m.group(1);
 				final String id = ws.textHandlerID();
 				logger.info("registering new connection with id: " + id + " for chat-room: " + chatRoom);
 				vertx.sharedData().getSet("chat.room." + chatRoom).add(id);
@@ -60,7 +64,6 @@ public class WebserverVerticle extends Verticle {
 				});
 
 				ws.dataHandler(new Handler<Buffer>() {
-
 					@Override
 					public void handle(final Buffer data) {
 
