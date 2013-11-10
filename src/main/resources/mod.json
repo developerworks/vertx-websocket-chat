@@ -1,0 +1,7 @@
+{
+  "main":"com.hascode.tutorial.vertx_tutorial.WebserverVerticle",
+  "description":"hasCode.com Vert.x Websocket Chat Sample",
+  "licenses": ["The Apache Software License Version 2.0"],
+  "author": "Micha Kops",
+  "homepage": "http://www.hascode.com/"
+}
