@@ -81,7 +81,6 @@ body {
 	var room = '';
 
 	function onMessageReceived(evt) {
-		console.log("xxx",evt);
 		var msg = JSON.parse(evt.data); // native API
 		var $messageLine = $('<tr><td class="received">' + msg.received
 				+ '</td><td class="user label label-info">' + msg.sender
